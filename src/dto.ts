@@ -10,3 +10,5 @@ export type SchedulePost = [
   Omit<_SchedulePost[0], "date"> & { date: string },
   _SchedulePost[1],
 ]
+
+export type GetPostMessageIds = Dto<"getPostMessageIds">

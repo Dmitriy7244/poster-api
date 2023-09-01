@@ -8,7 +8,9 @@ const messageId = 7445
 const date = dayjs().add(100, "minutes")
 const data = new PostScheduleData(channelIds, messageId, date)
 
-const r = await poster.schedulePost(data)
-console.log(r)
+// const r = await poster.schedulePost(data)
 
-await poster.reschedulePostGroup("64f146d8325ce330818ef15d", date)
+// await poster.reschedulePostGroup("64f146d8325ce330818ef15d", date)
+
+const r = await poster.getPostMessageIds(channelIds[1], 1296)
+console.log(r)

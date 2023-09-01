@@ -26,4 +26,9 @@ app.on(
   (dto: dto.DeletePostGroup) => poster.deletePostGroup(...dto),
 )
 
+app.on(
+  "getPostMessageIds",
+  (dto: dto.GetPostMessageIds) => poster.getPostMessageIds(...dto),
+)
+
 app.start(3232)
