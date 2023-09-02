@@ -4,3 +4,4 @@ services:
     restart: always
     environment:
       TZ: "Europe/Moscow"
+    network_mode: host
