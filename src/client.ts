@@ -1,6 +1,12 @@
 import { Method } from "./base.ts"
-import { Client, Dayjs, Poster as _Poster, PostScheduleData } from "./deps.ts"
-import * as dto from "./dto.ts"
+import {
+  Client,
+  Dayjs,
+  env,
+  log,
+  Poster as _Poster,
+  PostScheduleData,
+} from "./deps.ts"
 
 class Poster {
   private client: Client<Method>
@@ -10,45 +16,41 @@ class Poster {
   }
 
   private async post<Dto extends object>(method: Method, dto: Dto) {
+    log("post", { method, dto })
     const result = await this.client.post(method, dto)
     return result as any
   }
 
-  reschedulePostGroup: _Poster["reschedulePostGroup"] = (
-    id: string,
-    date: Dayjs,
-  ) => {
-    return this.post<dto.ReschedulePostGroup>("reschedulePostGroup", [
-      id,
-      date.toString(),
-    ])
+  private rpc<M extends Method>(
+    name: M,
+    s: (...args: Parameters<_Poster[M]>) => any[] = (...args) => args,
+  ) {
+    return (...args: Parameters<_Poster[M]>) => {
+      return this.post(name, s(...args)) as ReturnType<_Poster[M]>
+    }
   }
 
-  schedulePost: _Poster["schedulePost"] = (
-    data: PostScheduleData,
-    groupId?: string,
-  ) => {
-    const newData = { ...data, date: data.date.toString() }
-    return this.post<dto.SchedulePost>("schedulePost", [
-      newData,
-      groupId,
-    ])
-  }
+  deletePostGroup = this.rpc("deletePostGroup")
 
-  deletePostGroup: _Poster["deletePostGroup"] = (id: string) => {
-    return this.post<dto.DeletePostGroup>("deletePostGroup", [id])
-  }
+  reschedulePostGroup = this.rpc(
+    "reschedulePostGroup",
+    (id: string, date: Dayjs) => [id, date.toString()],
+  )
 
-  getPostMessageIds: _Poster["getPostMessageIds"] = (
-    chatId: number,
-    messageId: number,
-  ) => {
-    return this.post<dto.GetPostMessageIds>("getPostMessageIds", [
-      chatId,
-      messageId,
-    ])
-  }
+  schedulePost = this.rpc(
+    "schedulePost",
+    (
+      data: PostScheduleData,
+      groupId?: string,
+    ) => [{ ...data, date: data.date.toString() }, groupId],
+  )
+
+  getPostMessageIds = this.rpc("getPostMessageIds")
+}
+
+function createPosterFromEnv(keys: { apiUrl?: string } = {}) {
+  return new Poster(env.str(keys.apiUrl ?? "POSTER_URL"))
 }
 
 export default Poster
-export { PostScheduleData }
+export { createPosterFromEnv, PostScheduleData }

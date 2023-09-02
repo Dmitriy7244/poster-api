@@ -1,6 +1,6 @@
 import dayjs from "npm:dayjs"
 import { Method } from "./base.ts"
-import { App, createPosterFromEnv } from "./deps.ts"
+import { App, createPosterFromEnv, env } from "./deps.ts"
 import * as dto from "./dto.ts"
 
 const poster = await createPosterFromEnv()
@@ -31,4 +31,4 @@ app.on(
   (dto: dto.GetPostMessageIds) => poster.getPostMessageIds(...dto),
 )
 
-app.start(3232)
+app.start(env.int("PORT"))
